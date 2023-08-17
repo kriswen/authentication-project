@@ -162,12 +162,35 @@ app.get("/register", (req, res) => {
 });
 
 app.get("/secrets", function (req, res) {
+  //show all secrets
+  User.find({ secret: { $ne: null } }).then(function (foundUsers) {
+    //console.log("found users");
+    if (foundUsers) {
+      res.render("secrets", { usersWithSecrets: foundUsers });
+    }
+  });
+});
+
+app.get("/submit", function (req, res) {
   if (req.isAuthenticated()) {
-    res.render("secrets");
+    res.render("submit");
   } else {
     res.redirect("/login");
     console.log(req.isAuthenticated());
   }
+});
+
+app.post("/submit", function (req, res) {
+  User.findById(req.user.id)
+    .then(function (foundUser) {
+      foundUser.secret = req.body.secret;
+      foundUser.save();
+      console.log("secret saved");
+      res.redirect("/secrets");
+    })
+    .catch(function (err) {
+      console.log("error");
+    });
 });
 
 app.get("/logout", function (req, res) {
